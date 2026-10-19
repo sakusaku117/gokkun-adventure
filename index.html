@@ -32,16 +32,21 @@ button{font:inherit;cursor:pointer;color:inherit}
 
 /* タイトル */
 #title{text-align:center}
-#title h1{font-size:28px;white-space:nowrap;line-height:1.4;color:var(--main-dark)}
-#title .lead{font-size:19px;font-weight:bold;color:var(--accent);margin-bottom:8px}
-#title .intro{text-align:left;margin-bottom:12px}
+#title h1{font-size:28px;white-space:nowrap;line-height:1.4;color:var(--main-dark);margin-bottom:16px}
+#title .btn+.btn{margin-top:12px}
+
+/* こどもコースの せつめい */
+#kidsIntro{text-align:center}
+#kidsIntro h1{font-size:24px;line-height:1.5;color:var(--main-dark)}
+#kidsIntro .lead{font-size:19px;font-weight:bold;color:var(--accent);margin-bottom:8px}
+#kidsIntro .intro{text-align:left;margin-bottom:12px}
 .route{list-style:none;text-align:left;margin:4px 0 16px;border:2px dashed var(--line);border-radius:16px;padding:8px 12px}
 .route li{display:flex;align-items:center;gap:10px;padding:3px 0;font-size:17px;line-height:1.5}
 .route .num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--main);color:#fff;font-weight:bold;display:flex;align-items:center;justify-content:center;font-size:15px}
 .route li:nth-child(4) .num{background:var(--bad)}
 .route b{font-size:18px}
 .route small{color:var(--sub);font-size:14px}
-#title .btn+.btn{margin-top:12px}
+#kidsIntro .btn+.btn{margin-top:12px}
 
 /* ゲーム */
 #map{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;position:relative}
@@ -154,6 +159,15 @@ button{font:inherit;cursor:pointer;color:inherit}
     <div class="card">
       <div class="bounce" id="titleHero" aria-hidden="true"></div>
       <h1>ごっくん だいぼうけん</h1>
+      <button class="btn orange course" id="btnStart">🍙 こどもコース<small>10もん・アニメつき</small></button>
+      <button class="btn course" id="btnAdult">🎓 おとなコース<small data-r="20{問|もん}・クイズだけ"></small></button>
+    </div>
+  </section>
+
+  <!-- こどもコースの せつめい -->
+  <section id="kidsIntro" class="screen">
+    <div class="card">
+      <h1>🍙 こどもコース</h1>
       <p class="lead" data-r="おにぎりくんを ぶじに<br>{胃|い}まで とどけよう!"></p>
       <p class="intro" data-r="クイズに せいかいすると、おにぎりくんが のどの {中|なか}を すすむよ。ぜんぶで 5ステージ・10もん!"></p>
       <ol class="route">
@@ -163,10 +177,9 @@ button{font:inherit;cursor:pointer;color:inherit}
         <li><span class="num">4</span><span><b>ゴックン</b> <small data-r="{咽頭期|いんとうき}・いちばんの なんしょ!"></small></span></li>
         <li><span class="num">5</span><span><b>ゴール</b> <small data-r="{食道期|しょくどうき}"></small></span></li>
       </ol>
-      <button class="btn orange course" id="btnStart">🍙 こどもコース<small>10もん・アニメつき</small></button>
-      <button class="btn course" id="btnAdult">🎓 おとなコース<small data-r="20{問|もん}・クイズだけ"></small></button>
+      <button class="btn orange" id="btnGo">▶ ぼうけん スタート</button>
       <button class="btn ghost sound-btn"></button>
-      <p class="note">名前などの入力はありません。どこにも送信・保存されません。</p>
+      <button class="btn ghost" id="btnIntroBack">◀ もどる</button>
     </div>
   </section>
 
@@ -227,13 +240,14 @@ button{font:inherit;cursor:pointer;color:inherit}
           <rect x="6" y="24" width="300" height="186" rx="40" fill="#8e3a5a"/>
           <path d="M20,58 Q160,18 296,58" stroke="#f4a3b5" stroke-width="10" fill="none" stroke-linecap="round"/>
           <ellipse cx="316" cy="166" rx="30" ry="44" fill="#3d1326" stroke="#b9506a" stroke-width="3"/>
-          <text x="316" y="112" text-anchor="middle" font-size="16" font-weight="bold" fill="#5b1f36">のど</text>
+          <text id="lblNodo" x="316" y="112" text-anchor="middle" font-size="16" font-weight="bold" fill="#5b1f36" opacity="0">のど</text>
           <rect x="20" y="160" width="270" height="40" rx="20" fill="#ff8aa0" stroke="#b9506a" stroke-width="3"/>
           <g clip-path="url(#beltClip)"><g id="chev" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity=".85">
             <path d="M-20,171 l9,9 l-9,9"/><path d="M20,171 l9,9 l-9,9"/><path d="M60,171 l9,9 l-9,9"/><path d="M100,171 l9,9 l-9,9"/><path d="M140,171 l9,9 l-9,9"/>
             <path d="M180,171 l9,9 l-9,9"/><path d="M220,171 l9,9 l-9,9"/><path d="M260,171 l9,9 l-9,9"/><path d="M300,171 l9,9 l-9,9"/>
           </g></g>
-          <text x="150" y="224" text-anchor="middle" font-size="14" font-weight="bold" fill="#8e3a5a">した(ベルトコンベア)</text>
+          <!-- 「した」「のど」は こたえに なるので、せいかいするまで かくす -->
+          <text id="lblBelt" x="150" y="224" text-anchor="middle" font-size="14" font-weight="bold" fill="#8e3a5a" opacity="0">した(ベルトコンベア)</text>
         </g>
 
         <!-- 4 ゴックン(咽頭期) -->
@@ -269,8 +283,11 @@ button{font:inherit;cursor:pointer;color:inherit}
           <rect x="-10" y="86" width="262" height="48" fill="#f4a3b5"/>
           <path d="M236,72 C250,38 302,28 332,58 C362,94 352,172 302,198 C262,216 226,186 236,152 L242,136 L242,86 Z" fill="#ffb59e" stroke="#c9705a" stroke-width="3"/>
           <rect x="226" y="88" width="24" height="44" fill="#ffb59e"/>
-          <text x="298" y="122" text-anchor="middle" font-size="22" font-weight="bold" fill="#8a3b2a">い</text>
-          <text x="298" y="146" text-anchor="middle" font-size="13" font-weight="bold" fill="#8a3b2a">(ゴール)</text>
+          <!-- 「い」は こたえに なるので、せいかいするまで かくす -->
+          <g id="lblI" opacity="0">
+            <text x="298" y="122" text-anchor="middle" font-size="22" font-weight="bold" fill="#8a3b2a">い</text>
+            <text x="298" y="146" text-anchor="middle" font-size="13" font-weight="bold" fill="#8a3b2a">(ゴール)</text>
+          </g>
           <text x="314" y="56" font-size="22">🏁</text>
           <g id="ring" fill="#f07f98" stroke="#b9506a" stroke-width="2"><ellipse cx="0" cy="84" rx="12" ry="12"/><ellipse cx="0" cy="136" rx="12" ry="12"/></g>
           <text x="120" y="170" text-anchor="middle" font-size="14" font-weight="bold" fill="#b9506a">しょくどう</text>
@@ -480,13 +497,14 @@ const STAGES=[
     }}
   ]},
 { name:'すべる', ki:'{口腔期|こうくうき}', short:'こうくうき',
-  setup(){tr($('chev'),0,0);Object.assign(pose,{x:70,y:138,s:.55,r:0})},
+  setup(){tr($('chev'),0,0);op($('lblBelt'),0);op($('lblNodo'),0);Object.assign(pose,{x:70,y:138,s:.55,r:0})},
   steps:[
     {dur:2.6,f(p){
       tr($('chev'),(p*120)%40,0);
       pose.x=kv([[0,70],[1,180]],p);pose.r=kv([[0,0],[.2,-8],[.9,-8],[1,0]],p);
       face('happy');
       fx('シュルッ',130,100,win(p,.1,.88),30);
+      op($('lblBelt'),clamp(p/.2));
     }},
     {dur:2.4,f(p){
       tr($('chev'),(120+p*120)%40,0);
@@ -495,6 +513,7 @@ const STAGES=[
       pose.s=kv([[0,.55],[.65,.55],[1,.05]],p);
       face(p>.4?'wow':'happy');
       fx('のどへ GO!',150,100,win(p,.1,.9),26);
+      op($('lblNodo'),clamp(p/.2));
     }}
   ]},
 { name:'ゴックン', ki:'{咽頭期|いんとうき}', short:'いんとうき',
@@ -523,13 +542,14 @@ const STAGES=[
     }}
   ]},
 { name:'ゴール', ki:'{食道期|しょくどうき}', short:'しょくどうき',
-  setup(){tr($('ring'),6,0);op($('ring'),1);op($('stars'),0);Object.assign(pose,{x:42,y:110,s:.42,r:0})},
+  setup(){tr($('ring'),6,0);op($('ring'),1);op($('stars'),0);op($('lblI'),0);Object.assign(pose,{x:42,y:110,s:.42,r:0})},
   steps:[
     {dur:2.8,f(p){
       pose.x=kv([[0,42],[1,140]],p);pose.y=110+3*Math.sin(p*Math.PI*8);
       tr($('ring'),pose.x-34,0);
       face('happy');
       fx('ゴロゴロ',110,50,win(p,.05,.9),30);
+      op($('lblI'),clamp(p/.2));
     }},
     {dur:2.8,f(p){
       pose.x=kv([[0,140],[.7,290],[1,290]],p);
@@ -859,7 +879,9 @@ function goGoal(){
   $('starMsg').textContent=stars===10?'ぜんもん 1かいで せいかい! すごい!':`1かいで せいかい:${stars}もん`;
   beep(SND.goal);show('goal');
 }
-$('btnStart').onclick=start;
+$('btnStart').onclick=()=>show('kidsIntro');
+$('btnGo').onclick=start;
+$('btnIntroBack').onclick=()=>show('title');
 $('btnAgain').onclick=start;
 $('btnHome').onclick=()=>show('title');
 $('btnQuit').onclick=()=>{if(anim){cancelAnimationFrame(anim.raf);anim=null}stopMini();show('title')};
