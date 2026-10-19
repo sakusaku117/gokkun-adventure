@@ -485,11 +485,19 @@ function wrongAnim(){
 
 /* ---------- おと(さいしょは なし) ---------- */
 let soundOn=false, actx=null;
+// iPhone(iOS 17以降)で、マナーモードでも音が出るようにする
+try{if(navigator.audioSession) navigator.audioSession.type='playback'}catch(e){}
+function audio(){
+  actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  // スマホでは待機中(suspended)で作られることがあるので再開する
+  if(actx.state!=='running') actx.resume();
+  return actx;
+}
 function beep(notes){
   if(!soundOn) return;
   try{
-    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
-    let t=actx.currentTime;
+    audio();
+    let t=actx.currentTime+.02;
     for(const [f,d,type] of notes){
       const o=actx.createOscillator(),g=actx.createGain();
       o.type=type||'sine';o.frequency.value=f;
