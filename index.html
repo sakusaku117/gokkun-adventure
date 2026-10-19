@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>ごっくん だいぼうけん</title>
+<style>
+:root{--bg:#f2faf7;--card:#fff;--ink:#1d2b33;--sub:#52666f;--main:#0f8a7a;--main-dark:#0a6558;--line:#cfe3dd;--bad:#c23b4a;--accent:#e0731e;--accent-bg:#fff1e3}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{min-height:100vh;min-height:100dvh;background:var(--bg);color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic","Meiryo",sans-serif;font-size:18px;line-height:1.9;-webkit-tap-highlight-color:transparent}
+#app{max-width:520px;margin:0 auto;padding:12px 16px 40px}
+rt{font-size:.5em;color:var(--sub);font-weight:normal}
+.screen{display:none}
+.screen.show{display:block}
+.card{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:18px 16px;box-shadow:0 4px 14px rgba(15,138,122,.08)}
+button{font:inherit;cursor:pointer;color:inherit}
+.btn{display:block;width:100%;min-height:56px;padding:8px 14px;border:none;border-radius:16px;background:var(--main);color:#fff;font-size:20px;font-weight:bold;box-shadow:0 4px 0 var(--main-dark)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--main-dark)}
+.btn rt{color:#d9f3ee}
+.btn.orange{background:var(--accent);box-shadow:0 4px 0 #a9500f}
+.btn.ghost{background:#fff;color:var(--main-dark);border:2px solid var(--main);box-shadow:none;font-size:17px;min-height:48px}
+.note{font-size:14px;line-height:1.8;color:var(--sub);margin-top:14px}
+.advice{text-align:left;background:#fff8e6;border:2px solid #f3d999;border-radius:16px;padding:10px 14px;margin-top:16px;font-size:16px;line-height:1.9}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.bounce{display:inline-block;animation:bounce 1.4s ease-in-out infinite}
+
+/* タイトル */
+#title{text-align:center}
+#title h1{font-size:28px;white-space:nowrap;line-height:1.4;color:var(--main-dark)}
+#title .lead{font-size:19px;font-weight:bold;color:var(--accent);margin-bottom:8px}
+#title .intro{text-align:left;margin-bottom:12px}
+.route{list-style:none;text-align:left;margin:4px 0 16px;border:2px dashed var(--line);border-radius:16px;padding:8px 12px}
+.route li{display:flex;align-items:center;gap:10px;padding:3px 0;font-size:17px;line-height:1.5}
+.route .num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--main);color:#fff;font-weight:bold;display:flex;align-items:center;justify-content:center;font-size:15px}
+.route li:nth-child(4) .num{background:var(--bad)}
+.route b{font-size:18px}
+.route small{color:var(--sub);font-size:14px}
+#title .btn+.btn{margin-top:12px}
+
+/* ゲーム */
+#map{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;position:relative}
+#map::before{content:"";position:absolute;left:10%;right:10%;top:17px;border-top:3px dotted var(--line)}
+.ms{position:relative;flex:1;text-align:center;line-height:1.3}
+.ms .dot{width:34px;height:34px;margin:0 auto 2px;border-radius:50%;background:#e4ece9;color:#8aa29b;border:3px solid #e4ece9;font-weight:bold;font-size:16px;display:flex;align-items:center;justify-content:center}
+.ms span{font-size:12px;font-weight:bold;color:#8aa29b}
+.ms.cur .dot{background:#fff;color:var(--accent);border-color:var(--accent);transform:scale(1.15)}
+.ms.cur span{color:var(--accent)}
+.ms.done .dot{background:var(--main);border-color:var(--main);color:#fff}
+.ms.done span{color:var(--main-dark)}
+#stageHead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;line-height:1.6;margin:10px 2px 6px}
+#stageName{font-size:18px;font-weight:bold;color:var(--main-dark);white-space:nowrap}
+#stageName small{font-size:13px;color:var(--sub)}
+#qCount{flex:none;font-size:15px;font-weight:bold;color:var(--sub)}
+#stageWrap{border:2px solid var(--line);border-radius:20px;overflow:hidden;background:#fff8ec}
+#scene{display:block;width:100%;height:auto}
+.sc{display:none}
+.sc.show{display:inline}
+#qCard{margin-top:12px}
+#qText{font-size:20px;font-weight:bold;line-height:2}
+.choice{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;margin-top:10px;padding:8px 14px;border:3px solid var(--line);border-radius:16px;background:#fff;font-size:20px;font-weight:bold;text-align:left;line-height:1.5;box-shadow:0 3px 0 var(--line)}
+.choice:active{transform:translateY(2px);box-shadow:none}
+.choice .mk{flex:none;width:32px;height:32px;border-radius:50%;background:var(--main);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center}
+.choice.ng{border-color:#e7889a;background:#fdeef1;color:#b3485a;box-shadow:none;animation:shake .4s}
+.choice.ng .mk{background:#e7889a}
+.choice.ok{border-color:var(--main);background:#e8f7f2;color:var(--main-dark);box-shadow:none}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#hint{display:none;margin-top:12px;background:#fff8e6;border:2px solid #f3d999;border-radius:16px;padding:8px 14px;font-size:17px;line-height:1.9}
+#hint.show{display:block}
+#hint b{color:var(--accent)}
+#fb{display:none;margin-top:12px;background:#e8f7f2;border:2px solid var(--main);border-radius:16px;padding:10px 14px}
+#fb.show{display:block}
+#fb h2{font-size:22px;color:var(--main-dark);line-height:1.6}
+#fb p{font-size:17px;line-height:1.9;margin-bottom:10px}
+#btnNext{visibility:hidden}
+#btnNext.ready{visibility:visible}
+#gameBar{display:flex;gap:10px;margin-top:14px}
+#gameBar .btn{font-size:15px;min-height:44px}
+
+/* ゴール */
+#goal{text-align:center}
+#goal h1{font-size:28px;line-height:1.5;color:var(--accent)}
+.cert{margin:10px 0;border:4px double var(--accent);border-radius:18px;background:var(--accent-bg);padding:12px}
+.cert h2{font-size:21px;color:var(--main-dark);line-height:1.5}
+#starRow{font-size:21px;letter-spacing:0;white-space:nowrap;line-height:1.6;word-break:break-all}
+#starMsg{font-size:16px;font-weight:bold;color:var(--sub)}
+.cleared{list-style:none;text-align:left;margin:10px auto 0;max-width:20em;font-size:16px;line-height:2.2}
+#goal .msg{text-align:left;margin-top:8px}
+#goal .btn{margin-top:14px}
+@media (prefers-reduced-motion: reduce){.bounce,.choice.ng{animation:none}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- タイトル -->
+  <section id="title" class="screen show">
+    <div class="card">
+      <div class="bounce" id="titleHero" aria-hidden="true"></div>
+      <h1>ごっくん だいぼうけん</h1>
+      <p class="lead" data-r="おにぎりくんを ぶじに<br>{胃|い}まで とどけよう!"></p>
+      <p class="intro" data-r="クイズに せいかいすると、おにぎりくんが のどの {中|なか}を すすむよ。ぜんぶで 5ステージ・10もん!"></p>
+      <ol class="route">
+        <li><span class="num">1</span><span><b>さがす</b> <small data-r="{先行期|せんこうき}"></small></span></li>
+        <li><span class="num">2</span><span><b>くだく</b> <small data-r="{準備期|じゅんびき}"></small></span></li>
+        <li><span class="num">3</span><span><b>すべる</b> <small data-r="{口腔期|こうくうき}"></small></span></li>
+        <li><span class="num">4</span><span><b>ゴックン</b> <small data-r="{咽頭期|いんとうき}・いちばんの なんしょ!"></small></span></li>
+        <li><span class="num">5</span><span><b>ゴール</b> <small data-r="{食道期|しょくどうき}"></small></span></li>
+      </ol>
+      <button class="btn orange" id="btnStart">▶ ぼうけん スタート</button>
+      <button class="btn ghost sound-btn"></button>
+      <p class="note">名前などの入力はありません。どこにも送信・保存されません。</p>
+    </div>
+  </section>
+
+  <!-- ゲーム -->
+  <section id="game" class="screen">
+    <div id="map"></div>
+    <div id="stageHead"><span id="stageName"></span><span id="qCount"></span></div>
+    <div id="stageWrap">
+      <svg id="scene" viewBox="0 0 360 230" role="img" aria-label="おにぎりくんが すすむ アニメーション">
+        <defs><clipPath id="beltClip"><rect x="20" y="160" width="270" height="40" rx="20"/></clipPath></defs>
+
+        <!-- 1 さがす(先行期) -->
+        <g id="s1" class="sc">
+          <rect width="360" height="230" fill="#fff8ec"/>
+          <rect x="24" y="22" width="90" height="70" rx="8" fill="#d8f0ff" stroke="#b9d6e6" stroke-width="3"/>
+          <path d="M69,22 V92 M24,57 H114" stroke="#b9d6e6" stroke-width="3"/>
+          <rect y="176" width="360" height="54" fill="#e8c9a0"/>
+          <rect y="172" width="360" height="8" fill="#d4a974"/>
+          <ellipse cx="150" cy="174" rx="74" ry="13" fill="#fff" stroke="#c9b9b0" stroke-width="3"/>
+          <rect x="262" y="128" width="40" height="46" rx="8" fill="#e8f7f2" stroke="#7fb8aa" stroke-width="3"/>
+          <path d="M302,140 q14,0 14,12 q0,12 -14,12" fill="none" stroke="#7fb8aa" stroke-width="3"/>
+          <g id="think" opacity="0">
+            <circle cx="190" cy="98" r="5" fill="#fff" stroke="#3a2a2a" stroke-width="2"/>
+            <circle cx="203" cy="84" r="7" fill="#fff" stroke="#3a2a2a" stroke-width="2"/>
+            <rect x="196" y="10" width="154" height="64" rx="20" fill="#fff" stroke="#3a2a2a" stroke-width="2.5"/>
+            <text x="273" y="37" text-anchor="middle" font-size="15" font-weight="bold" fill="#1d2b33">👀🧠 おいしそう!</text>
+            <text x="273" y="61" text-anchor="middle" font-size="13" font-weight="bold" fill="#52666f">どう たべようかな?</text>
+          </g>
+          <g id="mag">
+            <circle r="24" fill="#ffffff" fill-opacity=".35" stroke="#e0731e" stroke-width="6"/>
+            <line x1="18" y1="18" x2="40" y2="40" stroke="#e0731e" stroke-width="9" stroke-linecap="round"/>
+          </g>
+        </g>
+
+        <!-- 2 くだく(準備期) -->
+        <g id="s2" class="sc">
+          <rect width="360" height="230" fill="#ffd9c7"/>
+          <rect x="24" y="28" width="312" height="184" rx="70" fill="#8e3a5a"/>
+          <ellipse cx="180" cy="204" rx="140" ry="44" fill="#ff8aa0" stroke="#b9506a" stroke-width="3"/>
+          <g id="tt" fill="#fff" stroke="#c9b9b0" stroke-width="2.5">
+            <rect x="74" y="28" width="32" height="42" rx="8"/><rect x="109" y="28" width="32" height="42" rx="8"/><rect x="144" y="28" width="32" height="42" rx="8"/>
+            <rect x="179" y="28" width="32" height="42" rx="8"/><rect x="214" y="28" width="32" height="42" rx="8"/><rect x="249" y="28" width="32" height="42" rx="8"/>
+          </g>
+          <g id="tb" fill="#fff" stroke="#c9b9b0" stroke-width="2.5">
+            <rect x="74" y="166" width="32" height="38" rx="8"/><rect x="109" y="166" width="32" height="38" rx="8"/><rect x="144" y="166" width="32" height="38" rx="8"/>
+            <rect x="179" y="166" width="32" height="38" rx="8"/><rect x="214" y="166" width="32" height="38" rx="8"/><rect x="249" y="166" width="32" height="38" rx="8"/>
+          </g>
+          <g id="drops" fill="#7cc7ff" stroke="#3d8fd1" stroke-width="1.5">
+            <path d="M0,-9 C5,-2 7,3 0,8 C-7,3 -5,-2 0,-9Z"/><path d="M0,-9 C5,-2 7,3 0,8 C-7,3 -5,-2 0,-9Z"/>
+            <path d="M0,-9 C5,-2 7,3 0,8 C-7,3 -5,-2 0,-9Z"/><path d="M0,-9 C5,-2 7,3 0,8 C-7,3 -5,-2 0,-9Z"/>
+          </g>
+          <g id="shine" opacity="0" font-size="18"><text x="132" y="104">✨</text><text x="212" y="96">✨</text><text x="216" y="146">✨</text></g>
+        </g>
+
+        <!-- 3 すべる(口腔期) -->
+        <g id="s3" class="sc">
+          <rect width="360" height="230" fill="#ffd9c7"/>
+          <rect x="6" y="24" width="300" height="186" rx="40" fill="#8e3a5a"/>
+          <path d="M20,58 Q160,18 296,58" stroke="#f4a3b5" stroke-width="10" fill="none" stroke-linecap="round"/>
+          <ellipse cx="316" cy="166" rx="30" ry="44" fill="#3d1326" stroke="#b9506a" stroke-width="3"/>
+          <text x="316" y="112" text-anchor="middle" font-size="16" font-weight="bold" fill="#5b1f36">のど</text>
+          <rect x="20" y="160" width="270" height="40" rx="20" fill="#ff8aa0" stroke="#b9506a" stroke-width="3"/>
+          <g clip-path="url(#beltClip)"><g id="chev" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity=".85">
+            <path d="M-20,171 l9,9 l-9,9"/><path d="M20,171 l9,9 l-9,9"/><path d="M60,171 l9,9 l-9,9"/><path d="M100,171 l9,9 l-9,9"/><path d="M140,171 l9,9 l-9,9"/>
+            <path d="M180,171 l9,9 l-9,9"/><path d="M220,171 l9,9 l-9,9"/><path d="M260,171 l9,9 l-9,9"/><path d="M300,171 l9,9 l-9,9"/>
+          </g></g>
+          <text x="150" y="224" text-anchor="middle" font-size="14" font-weight="bold" fill="#8e3a5a">した(ベルトコンベア)</text>
+        </g>
+
+        <!-- 4 ゴックン(咽頭期) -->
+        <g id="s4" class="sc">
+          <rect width="360" height="230" fill="#ffd9c7"/>
+          <path d="M132,0 L248,0 L276,100 L94,100 Z" fill="#8e3a5a"/>
+          <rect x="100" y="96" width="66" height="150" fill="#bfe3ff" stroke="#b9506a" stroke-width="3"/>
+          <rect x="204" y="96" width="66" height="150" fill="#c9efe0" stroke="#b9506a" stroke-width="3"/>
+          <g id="air" fill="none" stroke="#2f7fd1" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0">
+            <path d="M-9,-5 L0,5 L9,-5"/><path d="M-9,-5 L0,5 L9,-5"/><path d="M-9,-5 L0,5 L9,-5"/>
+          </g>
+          <text x="48" y="178" text-anchor="middle" font-size="15" font-weight="bold" fill="#2f6fa8">きどう</text>
+          <text x="48" y="198" text-anchor="middle" font-size="12" font-weight="bold" fill="#2f6fa8">(くうき)</text>
+          <path d="M80,186 L94,186 M88,180 L94,186 L88,192" fill="none" stroke="#2f6fa8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="316" y="178" text-anchor="middle" font-size="15" font-weight="bold" fill="#0a6558">しょくどう</text>
+          <text x="316" y="198" text-anchor="middle" font-size="12" font-weight="bold" fill="#0a6558">(たべもの)</text>
+          <path d="M290,206 L276,206 M282,200 L276,206 L282,212" fill="none" stroke="#0a6558" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <g id="lid"><rect id="lidR" x="-2" y="-6" width="70" height="12" rx="6" stroke="#b97a50" stroke-width="2.5"/></g>
+          <text id="lidTx" x="70" y="48" font-size="13" font-weight="bold" fill="#7a3b00" opacity="0">フタ</text>
+        </g>
+
+        <!-- 5 ゴール(食道期) -->
+        <g id="s5" class="sc">
+          <rect width="360" height="230" fill="#fff8ec"/>
+          <rect x="-10" y="72" width="262" height="76" fill="#f8bcc8" stroke="#b9506a" stroke-width="3"/>
+          <rect x="-10" y="86" width="262" height="48" fill="#f4a3b5"/>
+          <path d="M236,72 C250,38 302,28 332,58 C362,94 352,172 302,198 C262,216 226,186 236,152 L242,136 L242,86 Z" fill="#ffb59e" stroke="#c9705a" stroke-width="3"/>
+          <rect x="226" y="88" width="24" height="44" fill="#ffb59e"/>
+          <text x="298" y="122" text-anchor="middle" font-size="22" font-weight="bold" fill="#8a3b2a">い</text>
+          <text x="298" y="146" text-anchor="middle" font-size="13" font-weight="bold" fill="#8a3b2a">(ゴール)</text>
+          <text x="314" y="56" font-size="22">🏁</text>
+          <g id="ring" fill="#f07f98" stroke="#b9506a" stroke-width="2"><ellipse cx="0" cy="84" rx="12" ry="12"/><ellipse cx="0" cy="136" rx="12" ry="12"/></g>
+          <text x="120" y="170" text-anchor="middle" font-size="14" font-weight="bold" fill="#b9506a">しょくどう</text>
+          <g id="stars" opacity="0" font-size="20"><text x="244" y="58">⭐</text><text x="330" y="96">✨</text><text x="250" y="200">✨</text><text x="320" y="190">⭐</text></g>
+        </g>
+
+        <g id="hero"></g>
+        <text id="fx" text-anchor="middle" font-weight="bold" stroke="#fff" stroke-width="6" paint-order="stroke" stroke-linejoin="round" opacity="0"></text>
+      </svg>
+    </div>
+
+    <div id="qCard" class="card">
+      <p id="qText"></p>
+      <div id="choices"></div>
+      <div id="hint"></div>
+      <div id="fb">
+        <h2 id="fbTitle"></h2>
+        <p id="fbText"></p>
+        <button class="btn" id="btnNext"></button>
+      </div>
+    </div>
+    <div id="gameBar">
+      <button class="btn ghost" id="btnQuit">◀ タイトル</button>
+      <button class="btn ghost sound-btn"></button>
+    </div>
+  </section>
+
+  <!-- ゴール -->
+  <section id="goal" class="screen">
+    <div class="card">
+      <h1>🎉 ゴール!</h1>
+      <div class="bounce" id="goalHero" aria-hidden="true"></div>
+      <div class="cert">
+        <h2>ごっくんマスター にんてい!</h2>
+        <div id="starRow"></div>
+        <p id="starMsg"></p>
+        <ul class="cleared">
+          <li data-r="✅ 1 さがす({先行期|せんこうき})"></li>
+          <li data-r="✅ 2 くだく({準備期|じゅんびき})"></li>
+          <li data-r="✅ 3 すべる({口腔期|こうくうき})"></li>
+          <li data-r="✅ 4 ゴックン({咽頭期|いんとうき})"></li>
+          <li data-r="✅ 5 ゴール({食道期|しょくどうき})"></li>
+        </ul>
+      </div>
+      <p class="msg" data-r="ごっくんは、5つの ステージの チームワーク。あなたの のども、きょう やく600かい がんばって いるよ!"></p>
+      <p class="advice" data-r="🍵 {食事|しょくじ}で よく むせる、{飲|の}み{込|こ}みにくい など {気|き}になるときは、{医師|いし}や {言語聴覚士|げんごちょうかくし}に {相談|そうだん}してね。"></p>
+      <button class="btn orange" id="btnAgain">↺ もういちど あそぶ</button>
+      <button class="btn ghost" id="btnHome">タイトルへ</button>
+    </div>
+  </section>
+
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const ruby=s=>s.replace(/\{([^|}]+)\|([^}]+)\}/g,'<ruby>$1<rt>$2</rt></ruby>');
+const lerp=(a,b,p)=>a+(b-a)*p;
+const ease=p=>.5-.5*Math.cos(Math.PI*p);
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const win=(p,a,b,f=.08)=>clamp((p-a)/f)*(1-clamp((p-b)/f));
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// キーフレーム [[進み具合, 値], ...] をなめらかにつなぐ
+function kv(tr,t){
+  if(t<=tr[0][0]) return tr[0][1];
+  for(let i=0;i<tr.length-1;i++){
+    const a=tr[i],b=tr[i+1];
+    if(t<b[0]) return a[1]+(b[1]-a[1])*ease((t-a[0])/(b[0]-a[0]));
+  }
+  return tr[tr.length-1][1];
+}
+function tr(el,x,y,r=0,s=1){el.setAttribute('transform',`translate(${x},${y}) rotate(${r}) scale(${s})`)}
+function op(el,v){el.setAttribute('opacity',v)}
+
+/* ---------- おにぎりくん(ごっくんアニメと同じ絵) ---------- */
+function onigiri(){
+  return `<path d="M0,-41 C9,-41 42,10 41,27 C40,40 -40,40 -41,27 C-42,10 -9,-41 0,-41 Z" fill="#fff" stroke="#4b3a3a" stroke-width="3.5" stroke-linejoin="round"/>
+  <g fill="#ece6dc"><ellipse cx="-12" cy="-24" rx="3.2" ry="1.6" transform="rotate(-30 -12 -24)"/><ellipse cx="9" cy="-28" rx="3" ry="1.5" transform="rotate(25 9 -28)"/><ellipse cx="-27" cy="-2" rx="3" ry="1.5" transform="rotate(60 -27 -2)"/><ellipse cx="28" cy="-6" rx="3" ry="1.5" transform="rotate(-55 28 -6)"/><ellipse cx="2" cy="-16" rx="2.6" ry="1.4"/></g>
+  <rect x="-18" y="11" width="36" height="27" rx="2" fill="#1f3d2b"/>
+  <path d="M-12,16 L-4,16 M3,22 L11,22" stroke="#2f5a40" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="-23" cy="4" rx="5.5" ry="3.2" fill="#ffb3c1"/><ellipse cx="23" cy="4" rx="5.5" ry="3.2" fill="#ffb3c1"/>
+  <g data-face="happy"><ellipse cx="-11" cy="-6" rx="3.6" ry="4.6" fill="#3a2a2a"/><ellipse cx="11" cy="-6" rx="3.6" ry="4.6" fill="#3a2a2a"/><circle cx="-10" cy="-8" r="1.4" fill="#fff"/><circle cx="12" cy="-8" r="1.4" fill="#fff"/><path d="M-6,3 Q0,10 6,3" stroke="#3a2a2a" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+  <g data-face="wow"><circle cx="-11" cy="-7" r="5" fill="#3a2a2a"/><circle cx="11" cy="-7" r="5" fill="#3a2a2a"/><circle cx="-9.5" cy="-9" r="1.8" fill="#fff"/><circle cx="12.5" cy="-9" r="1.8" fill="#fff"/><ellipse cx="0" cy="6" rx="3.6" ry="4.6" fill="#8a2b3a"/></g>
+  <g data-face="scared"><circle cx="-11" cy="-6" r="5.5" fill="#fff" stroke="#3a2a2a" stroke-width="2"/><circle cx="11" cy="-6" r="5.5" fill="#fff" stroke="#3a2a2a" stroke-width="2"/><circle cx="-11" cy="-5" r="2.2" fill="#3a2a2a"/><circle cx="11" cy="-5" r="2.2" fill="#3a2a2a"/><path d="M-17,-16 L-7,-13 M17,-16 L7,-13" stroke="#3a2a2a" stroke-width="2.5" stroke-linecap="round"/><path d="M-8,6 q2,-3 4,0 q2,3 4,0 q2,-3 4,0 q2,3 4,0" stroke="#3a2a2a" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M28,-20 q-5,7 0,9 q5,-2 0,-9 Z" fill="#7cc7ff"/></g>
+  <g data-face="relief"><path d="M-15,-4 Q-11,-10 -7,-4 M7,-4 Q11,-10 15,-4" stroke="#3a2a2a" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M-7,2 Q0,11 7,2 Z" fill="#8a2b3a" stroke="#3a2a2a" stroke-width="2" stroke-linejoin="round"/></g>`;
+}
+function setFace(root,face){root.querySelectorAll('[data-face]').forEach(g=>{g.style.display=g.dataset.face===face?'':'none'})}
+function onigiriSVG(face,size){
+  const d=document.createElement('div');
+  d.innerHTML=`<svg viewBox="-50 -50 100 100" width="${size}" height="${size}" aria-hidden="true">${onigiri()}</svg>`;
+  setFace(d,face);
+  return d.innerHTML;
+}
+
+/* ---------- シーンの部品 ---------- */
+const HERO=$('hero'), FX=$('fx');
+HERO.innerHTML=onigiri();
+const pose={x:0,y:0,s:1,r:0,sx:1,sy:1,dx:0,face:'happy',base:'happy'};
+let shownFace='';
+function face(f){pose.face=f}
+function renderHero(){
+  const p=pose;
+  HERO.setAttribute('transform',`translate(${p.x+p.dx},${p.y}) rotate(${p.r}) scale(${p.s*p.sx},${p.s*p.sy})`);
+  if(p.face!==shownFace){setFace(HERO,p.face);shownFace=p.face}
+}
+function fx(t,x,y,o,size=26,color='#e0731e'){
+  FX.textContent=t;FX.setAttribute('x',x);FX.setAttribute('y',y);
+  FX.setAttribute('font-size',size);FX.setAttribute('fill',color);op(FX,o);
+}
+const DROPX=[100,140,222,262];
+
+/* ---------- 5つのステージと、せいかいした ときの うごき ---------- */
+const STAGES=[
+{ name:'さがす', ki:'{先行期|せんこうき}', short:'せんこうき',
+  setup(){tr($('mag'),320,40);op($('mag'),1);op($('think'),0);Object.assign(pose,{x:150,y:140,s:.8,r:0})},
+  steps:[
+    {dur:2.8,f(p){
+      tr($('mag'),kv([[0,320],[.35,190],[.55,118],[.75,178],[1,178]],p),kv([[0,40],[.35,128],[.55,138],[.75,124],[1,124]],p));
+      face(p>.3&&p<.88?'wow':'happy');
+      fx('ジーッ',80,128,win(p,.25,.85),28);
+      op($('think'),clamp((p-.62)/.15));
+    }},
+    {dur:2.4,f(p){
+      op($('think'),1-clamp(p/.15));op($('mag'),1-clamp(p/.15));
+      pose.x=kv([[0,150],[.2,150],[1,330]],p);
+      pose.y=kv([[0,140],[.2,140],[.6,30],[1,-50]],p);
+      pose.sy=p<.2?1-.2*Math.sin(p/.2*Math.PI):1;
+      pose.r=kv([[0,0],[.2,0],[1,360]],p);
+      pose.s=kv([[0,.8],[1,.6]],p);
+      face('happy');
+      fx('いただきます!',150,62,win(p,.1,.9),26);
+    }}
+  ]},
+{ name:'くだく', ki:'{準備期|じゅんびき}', short:'じゅんびき',
+  setup(){tr($('tt'),0,0);tr($('tb'),0,0);op($('drops'),0);op($('shine'),0);Object.assign(pose,{x:180,y:118,s:.55,r:0})},
+  steps:[
+    {dur:2.8,f(p){
+      const c=p<1?Math.abs(Math.sin(p*Math.PI*3)):0;
+      tr($('tt'),0,26*c);tr($('tb'),0,-26*c);
+      pose.sy=1-.28*c;pose.sx=1+.14*c;
+      face(c>.5?'wow':'happy');
+      fx('モグモグ',180,124,win(p,.05,.9),30,'#e0731e');
+      op(FX,win(p,.05,.9)*(c<.4?1:0));
+    }},
+    {dur:2.6,f(p){
+      op($('drops'),1);
+      [...$('drops').children].forEach((d,i)=>{
+        const st=i*.12, q=clamp((p-st)/.4);
+        tr(d,DROPX[i],60+60*q);op(d,win(p,st,st+.42,.06));
+      });
+      pose.r=12*Math.sin(p*Math.PI*4)*(1-p);
+      op($('shine'),clamp((p-.7)/.15));
+      face(p>.7?'relief':'happy');
+      fx(p<.65?'つば で まぜまぜ':'つるん!',180,p<.65?118:226,win(p,.05,.95),p<.65?22:26,'#2f7fd1');
+    }}
+  ]},
+{ name:'すべる', ki:'{口腔期|こうくうき}', short:'こうくうき',
+  setup(){tr($('chev'),0,0);Object.assign(pose,{x:70,y:138,s:.55,r:0})},
+  steps:[
+    {dur:2.6,f(p){
+      tr($('chev'),(p*120)%40,0);
+      pose.x=kv([[0,70],[1,180]],p);pose.r=kv([[0,0],[.2,-8],[.9,-8],[1,0]],p);
+      face('happy');
+      fx('シュルッ',130,100,win(p,.1,.88),30);
+    }},
+    {dur:2.4,f(p){
+      tr($('chev'),(120+p*120)%40,0);
+      pose.x=kv([[0,180],[.7,300],[1,316]],p);
+      pose.y=kv([[0,138],[.7,140],[1,170]],p);
+      pose.s=kv([[0,.55],[.65,.55],[1,.05]],p);
+      face(p>.4?'wow':'happy');
+      fx('のどへ GO!',150,100,win(p,.1,.9),26);
+    }}
+  ]},
+{ name:'ゴックン', ki:'{咽頭期|いんとうき}', short:'いんとうき',
+  setup(){tr($('lid'),100,96,-75);$('lidR').setAttribute('fill','#fbd3a8');op($('air'),0);op($('lidTx'),1);Object.assign(pose,{x:190,y:46,s:.5,r:0})},
+  steps:[
+    {dur:2.8,f(p){
+      op($('air'),win(p,.05,.85));
+      [...$('air').children].forEach((a,i)=>tr(a,133,110+((p*3+i/3)%1)*60));
+      pose.y=46+3*Math.sin(p*Math.PI*6);
+      face('wow');
+      fx('ここが こうさてん!',180,150,win(p,.05,.9),18,'#c23b4a');
+    }},
+    {dur:2.6,f(p){
+      const a=kv([[0,-75],[.25,0],[1,0]],p);
+      tr($('lid'),100,96,a);
+      $('lidR').setAttribute('fill',a>-20?'#e04a4a':'#fbd3a8');
+      op($('lidTx'),1-clamp(p/.1));
+      pose.x=kv([[0,190],[.3,190],[.75,237],[1,237]],p);
+      pose.y=kv([[0,46],[.3,46],[.75,150],[1,160]],p);
+      pose.s=kv([[0,.5],[.75,.42],[1,.42]],p);
+      pose.sy=p>.3&&p<.75?1.12:1;pose.sx=p>.3&&p<.75?.88:1;
+      face(p<.75?'wow':'relief');
+      if(p<.32) fx('フタ しまる!',60,60,win(p,.02,.3,.04),20,'#c23b4a');
+      else fx('ゴックン!',300,70,win(p,.33,.95),28,'#c23b4a');
+    }}
+  ]},
+{ name:'ゴール', ki:'{食道期|しょくどうき}', short:'しょくどうき',
+  setup(){tr($('ring'),6,0);op($('ring'),1);op($('stars'),0);Object.assign(pose,{x:42,y:110,s:.42,r:0})},
+  steps:[
+    {dur:2.8,f(p){
+      pose.x=kv([[0,42],[1,140]],p);pose.y=110+3*Math.sin(p*Math.PI*8);
+      tr($('ring'),pose.x-34,0);
+      face('happy');
+      fx('ゴロゴロ',110,50,win(p,.05,.9),30);
+    }},
+    {dur:2.8,f(p){
+      pose.x=kv([[0,140],[.7,290],[1,290]],p);
+      pose.y=kv([[0,110],[.7,138],[1,150]],p);
+      pose.s=kv([[0,.42],[.7,.5],[1,.5]],p);
+      tr($('ring'),Math.min(pose.x-34,228),0);
+      op($('stars'),clamp((p-.72)/.15));
+      face(p>.72?'relief':'happy');
+      fx(p<.65?'なみに のって…':'とうちゃく!',p<.65?110:130,50,win(p,.05,.97),p<.65?22:30);
+    }}
+  ]}
+];
+
+/* ---------- クイズ10もん(1ステージ2もん) ---------- */
+const QUIZ=[
+{q:'たべものを {見|み}て「おいしそう!」と さくせんを たてるのは どこ?',c:['め と のう','はな と みみ','て と あし'],
+ hint:'ポスターの ステージ1は「{目|め}と {脳|のう}の さくせんかいぎ」だよ。',
+ exp:'め で {見|み}て、のう で「どうやって {食|た}べよう」と かんがえるよ。'},
+{q:'たべる まえの よい しせいは どれ?',c:['あごを ひく','あごを あげる','よこを むく'],
+ hint:'あごを あげると、たべものが くうきの みちに はいりやすく なっちゃうよ。',
+ exp:'あごを かるく ひいて、せすじを のばすと、ごっくん しやすいよ。'},
+{q:'たべものを こまかく する「ミキサー」は どれ?',c:['は と した','みみ と はな','のど と い'],
+ hint:'ステージ2は「{歯|は}と {舌|した}の ミキサー{工場|こうじょう}」。くちの {中|なか}に あるのは どれかな?',
+ exp:'は で かんで、した で まぜて、のみこみやすい かたまりに するよ。'},
+{q:'モグモグの とき、たべものと まざって やわらかく するのは?',c:['つば','なみだ','あせ'],
+ hint:'くちの {中|なか}から でてくる ものだよ。すっぱい ものを {見|み}ると いっぱい でるね。',
+ exp:'つば と まざると、たべものが まとまって すべりやすく なるよ。'},
+{q:'たべものを のどへ おくる「ベルトコンベア」は?',c:['した','は','はな'],
+ hint:'ステージ3は「{舌|した}の ベルトコンベア」だよ。',
+ exp:'した が うえの あごに おしつけるように うごいて、たべものを おくへ おくるよ。'},
+{q:'した は おにぎりくんを、シュルッと どこへ おくる?',c:['のどの おく','はなの おく','みみの おく'],
+ hint:'つぎの ステージは「のど」だよ。たべものが すすむ みちを かんがえてね。',
+ exp:'のどの おくへ とどくと、「ごっくん」の スイッチが はいるよ。'},
+{q:'のどは、なにと なにの こうさてん?',c:['くうきと たべもの','みずと ひかり','おとと におい'],
+ hint:'のどは、いきを する ときにも、たべる ときにも つかう みちだよ。',
+ exp:'のどでは、くうきの みちと たべものの みちが まじわって いるんだ。'},
+{q:'ゴックンの しゅんかん、フタが とじて いるのは どれくらい?',c:['やく 0.5びょう','やく 5びょう','やく 50びょう'],
+ hint:'「いち」と かぞえる あいだより、もっと みじかいよ!',
+ exp:'フタ({喉頭蓋|こうとうがい})は やく0.5びょうだけ とじて、くうきの みちを まもるよ。'},
+{q:'たべものが さいごに とうちゃくする ゴールは どこ?',c:['い','はい','しんぞう'],
+ hint:'ポスターの ゴールの えを みてね。おなかの {中|なか}で たべものを とかす ところだよ。',
+ exp:'しょくどうを とおって、い に とうちゃく! はい は くうきが はいる ところだよ。'},
+{q:'ひとは 1にちに なんかい ぐらい のみこむ?',c:['やく 600かい','やく 60かい','やく 6かい'],
+ hint:'たべものだけ じゃなくて、つばも のみこんで いるよ。とっても おおいんだ!',
+ exp:'つばも ふくめて、1にちに やく600かいも ごっくん して いるんだ。'}
+];
+
+/* ---------- アニメの さいせい ---------- */
+let anim=null;
+function play(f,dur,done){
+  if(anim){cancelAnimationFrame(anim.raf);anim.f(1);const d=anim.done;anim=null;d&&d()}
+  if(reduceMotion){f(1);renderHero();done&&done();return}
+  const a={f,done,t0:performance.now()};
+  const tick=now=>{
+    const p=clamp((now-a.t0)/(dur*1000));
+    f(p);renderHero();
+    if(p<1) a.raf=requestAnimationFrame(tick);
+    else {anim=null;done&&done()}
+  };
+  anim=a;a.raf=requestAnimationFrame(tick);
+}
+function wrongAnim(){
+  const base=pose.base;
+  play(p=>{
+    pose.dx=p<1?7*Math.sin(p*Math.PI*8)*(1-p):0;
+    face(p<1?'scared':base);
+    fx('むせっ!',clamp(pose.x,50,310),clamp(pose.y-48*pose.s-6,26,220),win(p,0,.85,.05),24,'#c23b4a');
+  },.8);
+}
+
+/* ---------- おと(さいしょは なし) ---------- */
+let soundOn=false, actx=null;
+function beep(notes){
+  if(!soundOn) return;
+  try{
+    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    let t=actx.currentTime;
+    for(const [f,d,type] of notes){
+      const o=actx.createOscillator(),g=actx.createGain();
+      o.type=type||'sine';o.frequency.value=f;
+      g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+d);
+      o.connect(g).connect(actx.destination);o.start(t);o.stop(t+d);t+=d*.8;
+    }
+  }catch(e){}
+}
+const SND={ok:[[660,.15],[880,.25]],ng:[[200,.25,'triangle']],clear:[[523,.12],[659,.12],[784,.3]],goal:[[523,.15],[659,.15],[784,.15],[1047,.4]]};
+function renderSound(){document.querySelectorAll('.sound-btn').forEach(b=>b.textContent=soundOn?'🔊 おと:あり':'🔈 おと:なし')}
+document.querySelectorAll('.sound-btn').forEach(b=>b.onclick=()=>{soundOn=!soundOn;renderSound();beep(SND.ok)});
+
+/* ---------- ゲームの すすみかた ---------- */
+let qi=0, stars=0, missed=false;
+const MK=['ア','イ','ウ'];
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('show',s.id===id));scrollTo(0,0)}
+function stageOf(i){return Math.floor(i/2)}
+
+function renderMap(cleared){
+  const cur=stageOf(qi);
+  $('map').innerHTML=STAGES.map((s,i)=>{
+    const done=i<cur||(i===cur&&cleared);
+    const cls=done?'done':i===cur?'cur':'';
+    return `<div class="ms ${cls}"><div class="dot">${done?'✓':i+1}</div><span>${s.name}</span></div>`;
+  }).join('');
+}
+function enterStage(si){
+  document.querySelectorAll('.sc').forEach((g,i)=>g.classList.toggle('show',i===si));
+  Object.assign(pose,{sx:1,sy:1,dx:0,r:0,face:'happy',base:'happy'});
+  STAGES[si].setup();op(FX,0);renderHero();
+}
+function showQuestion(){
+  const si=stageOf(qi), s=STAGES[si], Q=QUIZ[qi];
+  missed=false;
+  renderMap(false);
+  $('stageName').innerHTML=ruby(`ステージ${si+1} ${s.name} <small>${s.ki}</small>`);
+  $('qCount').textContent=`もんだい ${qi+1}/10`;
+  $('qText').innerHTML=ruby(Q.q);
+  const order=Q.c.map((t,i)=>({t,ok:i===0}));
+  for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
+  $('choices').innerHTML='';
+  order.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='choice';b.innerHTML=`<span class="mk">${MK[i]}</span><span>${o.t}</span>`;
+    b.onclick=()=>answer(b,o.ok);
+    $('choices').appendChild(b);
+  });
+  $('hint').className='';$('fb').className='';$('btnNext').className='btn';
+}
+function answer(btn,ok){
+  if(btn.disabled) return;
+  const Q=QUIZ[qi];
+  if(!ok){
+    missed=true;btn.disabled=true;btn.classList.add('ng');
+    $('hint').innerHTML=ruby('<b>💡 ヒント</b> '+Q.hint);$('hint').className='show';
+    beep(SND.ng);wrongAnim();
+    return;
+  }
+  if(!missed) stars++;
+  document.querySelectorAll('.choice').forEach(b=>{b.disabled=true;if(b!==btn) b.style.display='none'});
+  btn.classList.add('ok');
+  $('hint').className='';
+  const si=stageOf(qi), last=qi%2===1;
+  $('fbTitle').textContent=last?(qi===9?'🎉 ぶじに とうちゃく!':`🎉 ステージ${si+1} クリア!`):'⭕ せいかい!';
+  $('fbText').innerHTML=ruby(Q.exp);
+  $('btnNext').textContent=qi===9?'ゴールへ ▶':last?'つぎの ステージへ ▶':'つぎの もんだい ▶';
+  $('fb').className='show';
+  beep(last?SND.clear:SND.ok);
+  const st=STAGES[si].steps[qi%2];
+  play(st.f,st.dur,()=>{
+    pose.base=pose.face;
+    if(last) renderMap(true);
+    $('btnNext').classList.add('ready');
+  });
+}
+$('btnNext').onclick=()=>{
+  if(!$('btnNext').classList.contains('ready')) return;
+  if(qi===9){goGoal();return}
+  qi++;
+  if(qi%2===0) enterStage(stageOf(qi));
+  showQuestion();
+  $('stageWrap').scrollIntoView({block:'nearest'});
+};
+function start(){qi=0;stars=0;enterStage(0);showQuestion();show('game')}
+function goGoal(){
+  $('starRow').textContent='⭐'.repeat(stars)+'☆'.repeat(10-stars);
+  $('starMsg').textContent=stars===10?'ぜんもん 1かいで せいかい! すごい!':`1かいで せいかい:${stars}もん`;
+  beep(SND.goal);show('goal');
+}
+$('btnStart').onclick=start;
+$('btnAgain').onclick=start;
+$('btnHome').onclick=()=>show('title');
+$('btnQuit').onclick=()=>{if(anim){cancelAnimationFrame(anim.raf);anim=null}show('title')};
+
+document.querySelectorAll('[data-r]').forEach(el=>el.innerHTML=ruby(el.dataset.r));
+$('titleHero').innerHTML=onigiriSVG('happy',110);
+$('goalHero').innerHTML=onigiriSVG('relief',110);
+renderSound();
+</script>
+</body>
+</html>
